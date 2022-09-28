@@ -38,8 +38,8 @@ jobs:
         run: | 
           rm ./index.html 
           mv ./index.min.html ./index.html
-          rm ./find.js
-          mv ./find.min.js ./find.js
+          rm ./finder.js
+          mv ./finder.min.js ./finder.js
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
