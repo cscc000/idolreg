@@ -19,22 +19,17 @@ $(document).ready(() => {
             console.log(d);
             matcher = new faceapi.FaceMatcher(d, 0.5);
             console.log(matcher);
-            function loadImg(uri) {
-                let img = new Image();
-                img.crossOrigin = 'anonymous';
-                img.onload = async function () {
-                    var dim;
-                    if (img.width < 500) {
-                        dim = { width: img.width, height: img.height };
-                    } else {
-                        dim = { width: 500, height: Math.round(img.height * 500 / img.width) };
-                    }
-                    $("#main-canvas").attr(dim);
-                    let cv = $("#main-canvas")[0];
-                    cv.getContext("2d").drawImage(img, 0, 0, dim.width, dim.height);
+            function run(test, dim, cv) {
+                return new Promise((resolve, reject) => {
+                    cv = cv || $("#main-canvas")[0];
+                    dim = dim || {width: cv.width, height: cv.height};
                     $("#info-msg").html("Calculating...");
                     setTimeout(async ()  => {
                         let detections = await faceapi.detectAllFaces(cv).withFaceLandmarks().withFaceDescriptors();
+                        if (test) {
+                            resolve();
+                            return;
+                        }
                         console.log(detections);
                         if (detections.length == 0) {
                             $("#info-msg").html("");
@@ -70,6 +65,23 @@ $(document).ready(() => {
                         $("#info-msg").html(html + '</ul>');
                         $("#error-msg").html("");
                     }, 50);
+                    resolve();
+                });
+            }
+            function loadImg(uri) {
+                let img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = async function () {
+                    var dim;
+                    if (img.width < 500) {
+                        dim = { width: img.width, height: img.height };
+                    } else {
+                        dim = { width: 500, height: Math.round(img.height * 500 / img.width) };
+                    }
+                    $("#main-canvas").attr(dim);
+                    let cv = $("#main-canvas")[0];
+                    cv.getContext("2d").drawImage(img, 0, 0, dim.width, dim.height);
+                    run();
                 };
                 img.src = uri;
             }
@@ -87,8 +99,10 @@ $(document).ready(() => {
                     fr.readAsDataURL(files[0]);
                 }
             });
-            $(".img-src").show();
-            $("#info-msg").html("Ready!!!");
+            run(true).then(() => {
+                $(".img-src").show();
+                $("#info-msg").html("Ready!!!");
+            });
         }).fail(() => {
             $('#error-msg').html('ERROR: Cannot load samples!');
         });
