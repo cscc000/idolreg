@@ -34,6 +34,12 @@ jobs:
         uses: actions/configure-pages@v2
       - name: Minify-JS Action
         uses: JossyDevers/minify-js@v1.0.1
+      - name: Rename minified
+        run: | 
+          rm ./index.html 
+          mv ./index.min.html ./index.html
+          rm ./find.js
+          mv ./find.min.js ./find.js
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
